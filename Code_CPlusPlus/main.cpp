@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
         istringstream iss(line);
         int a, b;
         // process pair (a,b)
-        if (!(iss >> a >> b)) { break; } // error
+        if (!(iss >> a >> hex >> b)) { break; } // error
       
       
         // this is were we actually handle cache instructions
