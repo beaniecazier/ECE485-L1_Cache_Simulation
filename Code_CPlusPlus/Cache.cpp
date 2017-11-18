@@ -7,6 +7,8 @@ Cache::Cache(int associativity)
 	{
 		set = new Set(associativity);
 	}
+	
+	//put function definitions here
 }
 
 Cache::~Cache()
