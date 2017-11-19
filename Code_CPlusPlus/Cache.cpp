@@ -19,7 +19,7 @@ Cache::~Cache()
 int getIndex(int address)
 {
 	address = address << TAG_BITS; //bitshift to left to erase tag bits
-	return address = addres >> (TAG_BITS + OFFSET_BITS); //bitshift to right to erase offset bits and 
+	return address = address >> (TAG_BITS + OFFSET_BITS); //bitshift to right to erase offset bits and 
 							     //shift index bits back into position.
 }
 
