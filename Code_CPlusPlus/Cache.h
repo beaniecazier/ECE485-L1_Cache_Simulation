@@ -13,12 +13,11 @@ public:
 	Cache(int associativity, bool verbose);  //constructor
 	~Cache(); //destructor
 	
-	//put primitives here (function declarations)
+	//public function declarations (primitives, prototypes)
 	int readData(int address);
 	int writeData(int address);
 	int invalidataData(int address);
 	int readDataToL2(int address);
-		//
 	
 
 private:
