@@ -18,6 +18,9 @@ public:
 	int writeData(int address);
 	int invalidataData(int address);
 	int readDataToL2(int address);
+	int resetAll();
+	int printCache();
+	int clearCache();
 	
 
 private:
