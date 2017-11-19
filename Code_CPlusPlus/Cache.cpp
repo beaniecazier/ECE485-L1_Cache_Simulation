@@ -27,15 +27,31 @@ int Cache::getIndex(int address)
 int Cache::getTag(int address)
 {
 	//bitshift to the right 20 bits (32 proc bits - 12 tag bits)
-	return address = address >> ((PROC_SIZE - TAG_BITS); 
+	return address = address >> (PROC_SIZE - TAG_BITS); 
 }
 
 
 //Public function definitions here
 int Cache::readData(int address)
 {
-	return sets[ getIndex( address) ].read( getTag( address), verbose);
+	return sets[ getIndex( address) ].read( getTag( address) );
 }
 
 int Cache::writeData(int address)
+{
+	return sets[ getIndex( address) ].write( getTag( address) );
+}
+
+int Cache::invalidataData(int address)
+{
+	return sets[ getIndex( address) ].invalidate( getTag( address) );
+}
+
+int Cache::readDataToL2(int address)
+{
+	return sets[ getIndex( address) ].readToL2( getTag( address) );
+}
+
+
+				     
 				     
