@@ -8,11 +8,6 @@ Cache::Cache(int associativity, bool verbose)
 	{
 		set = new Set(associativity, verbose);
 	}
-	
-	/*for (int i = (NUM_SETS + 1); i > 0; --i)
-	{*/
-		
-	
 }
 
 Cache::~Cache()
@@ -44,5 +39,3 @@ int Cache::readData(int address)
 
 int Cache::writeData(int address)
 				     
-		
-	
