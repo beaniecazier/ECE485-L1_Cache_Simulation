@@ -1,7 +1,10 @@
 #include "Set.h"
 #include <math.h>
 
-#define NUM_SETS 16384
+#define PROC_SIZE = 32 //because Processor is 32-bit 
+#define NUM_SETS 16384 //because 16K sets = 2^14
+#define OFFSET_BITS 6 //because 64B lines = (2^6)B
+#define TAG_BITS 12 //because sets + lines = 14+6=20, 32-20=12
 
 #pragma once
 class Cache
