@@ -3,10 +3,16 @@
 
 Cache::Cache(int associativity, bool verbose)
 {
+	
 	for each (Set set in sets) //classes are defined with uppercase; sets is a variable
 	{
 		set = new Set(associativity, verbose);
 	}
+	
+	/*for (int i = (NUM_SETS + 1); i > 0; --i)
+	{*/
+		
+	
 }
 
 Cache::~Cache()
@@ -16,14 +22,14 @@ Cache::~Cache()
 
 
 //Private function definitions here
-int getIndex(int address)
+int Cache::getIndex(int address)
 {
 	address = address << TAG_BITS; //bitshift to left to erase tag bits
 	return address = address >> (TAG_BITS + OFFSET_BITS); //bitshift to right to erase offset bits and 
 							     //shift index bits back into position.
 }
 
-int getTag(int address)
+int Cache::getTag(int address)
 {
 	//bitshift to the right 20 bits (32 proc bits - 12 tag bits)
 	return address = address >> ((PROC_SIZE - TAG_BITS); 
@@ -31,8 +37,12 @@ int getTag(int address)
 
 
 //Public function definitions here
-Cache::readData(int address)
+int Cache::readData(int address)
 {
-	index = getIndex(int address)
+	return sets[ getIndex( address) ].read( getTag( address), verbose);
+}
+
+int Cache::writeData(int address)
+				     
 		
 	
