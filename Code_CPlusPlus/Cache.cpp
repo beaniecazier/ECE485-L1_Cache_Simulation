@@ -52,6 +52,45 @@ int Cache::readDataToL2(int address)
 	return sets[ getIndex( address) ].readToL2( getTag( address) );
 }
 
+int Cache::resetAll()
+{
+	int failures = 0;
+	for( int i = NUM_SETS; i>0; --i)
+	{
+		if( sets[ i].reset() ) //expects a 0 for normal, -1 (or any value but 0) for failure
+			--failures;
+	}
+	return failures; //0 if no failues, a negative number for the number of failures.
+}
+
+int Caches::printCache()
+{
+	int setsContainingData = 0;
+	for( int i = NUM_SETS; i>0; --i)
+	{
+		setsContainingData = setsContainingData + sets[ i].print() )
+	}
+	return setsContainingData; //0 if no sets contain data
+	//If sets.print passes back a 1 when that set contains data, then the return value for this function
+	//will be number of sets containing data
+	//If sets.print instead passes back the number of ways in that set which contain data, then the return 
+	//value for this function will be the number of total ways across the cache that contain data.
+}
+
+int Caches::clearCache()
+{
+	int failures = 0;
+	for( int i = NUM_SETS; i>0; --i)
+	{
+		if( sets[ i].clear() ) //expects a 0 for normal, -1 (or any value but 0) for failure
+			--failures;
+	}
+	return failures; //0 if no failues, a negative number for the number of failures.
+}
+
+
+
+
 
 				     
 				     
