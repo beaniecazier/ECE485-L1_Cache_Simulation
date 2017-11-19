@@ -68,7 +68,7 @@ int Caches::printCache()
 	int setsContainingData = 0;
 	for( int i = NUM_SETS; i>0; --i)
 	{
-		setsContainingData = setsContainingData + sets[ i].print() )
+		setsContainingData = setsContainingData + sets[ i].print();
 	}
 	return setsContainingData; //0 if no sets contain data
 	//If sets.print passes back a 1 when that set contains data, then the return value for this function
