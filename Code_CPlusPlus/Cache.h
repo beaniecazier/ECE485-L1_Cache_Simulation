@@ -25,13 +25,10 @@ public:
 	int resetAll();
 	int printCache();
 	int clearCache();
-	
 
 private:
-	// 16k sets
 	Set* sets;
-	
-	//put variables here
+	int setSize;
 	bool verbose;
 	
 	int getIndex(int address);
