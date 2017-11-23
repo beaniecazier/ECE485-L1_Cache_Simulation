@@ -11,15 +11,12 @@
 
 using namespace std;
 
-#define NUM_SETS 16384 //because 16K sets = 2^14
+#define NUM_SETS	16384 //because 16K sets = 2^14
+#define INSTR_ASSOC	2
+#define DATA_ASSOC	4
 
 void ResetCache();
 
-int HitCount = 0;
-int MissCount = 0;
-int CacheReads = 0;
-int CacheWrites = 0;
-long totalOperations = 0;
 Cache* instructionCache;
 Cache* dataCache;
 
@@ -27,9 +24,15 @@ int main(int argc, char* argv[])
 {
 	string line;
 	ifstream file;
+	bool verbose = false;
+	
+	for (int i = 0; i < argc; i++)
+	{
+		verbose |= checkFlags(argv[i]);
+	}
 
-	instructionCache = new Cache(2);
-	dataCache = new Cache(4);
+	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC);
+	dataCache = new Cache(NUM_SETS, DATA_ASSOC);
 
 	try
 	{
@@ -45,7 +48,7 @@ int main(int argc, char* argv[])
 
 
 														// this is were we actually handle cache instructions
-				cout << a << ',' << b << '\n';
+				cout << a << ',' << hex << b << '\n';
 				//
 			}
 		}
@@ -59,6 +62,18 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+bool checkFlags(char* arg)
+{
+}
+
 void ResetCache()
 {
+	if (instructionCache->resetAll() < 0)
+	{
+		cout << "ERROR RESETING INSTRUCTION CACHE\n";
+	}
+	if (dataCache->resetAll() < 0)
+	{
+		cout << "ERROR RESETING DATA CACHE\n";
+	}
 }
