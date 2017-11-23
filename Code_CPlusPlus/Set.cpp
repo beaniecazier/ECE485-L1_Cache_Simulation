@@ -1,10 +1,19 @@
 Set::Set(int associativity, bool verbose)
 {
-  this.verbose = verbose;
-  lines = new Line[associativity];
+ 	this.verbose = verbose;
+	this.associativity = associativity;
+ 	lines = new Line[this.associativity];
+	for (int i = 0; i < this.associativity; i++)
+	{
+		lines[i] = new Line();
+	}
 }
 
 Set::~Set()
 {
-  delete [] lines;
+	for (int i = 0; i < this.associativity; i++)
+	{
+		delete lines[i];
+	}
+ 	delete [] lines;
 }
