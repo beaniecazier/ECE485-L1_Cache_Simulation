@@ -27,6 +27,7 @@ public:
 private:
 	Set* sets;
 	int setSize;
+	int associativity;
 	bool verbose;
 	int HitCount;
 	int MissCount;
