@@ -11,6 +11,8 @@
 
 using namespace std;
 
+#define NUM_SETS 16384 //because 16K sets = 2^14
+
 void ResetCache();
 
 int HitCount = 0;
