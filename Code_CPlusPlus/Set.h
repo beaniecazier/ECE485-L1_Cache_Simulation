@@ -6,6 +6,13 @@ enum MESI
 	EXCLUSIVE = 3,
 };
 
+struct Line 
+{
+	int tag;
+	int LRU;
+	MESI mesi;
+}
+
 class Set
 {
 public:
@@ -13,18 +20,5 @@ public:
 	~Set();
 
 private:
-	// array of tags
-	int* tag;
-	// array of LRU
-	int* LRU;
-	// MESI states
-	MESI* mesi;
+	Line* lines;
 };
-
-Set::Set(int associativity)
-{
-}
-
-Set::~Set()
-{
-}
