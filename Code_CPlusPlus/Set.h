@@ -21,4 +21,5 @@ public:
 
 private:
 	Line* lines;
+	bool verbose;
 };
