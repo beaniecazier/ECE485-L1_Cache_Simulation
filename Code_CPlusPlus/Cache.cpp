@@ -1,10 +1,11 @@
 #include "Cache.h"
 
-Cache::Cache(int associativity, bool verbose)
+Cache::Cache(int setSize, int associativity, bool verbose)
 {
+	this.setSize = setSize;
 	this.verbose = verbose;
-	sets = new Set[NUM_SETS];
-	for (int i = 0; i < NUM_SETS; i++) //classes are defined with uppercase; sets is a variable
+	sets = new Set[setSize];
+	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
 	{
 		sets[i] = new Set(associativity, verbose);
 	}
@@ -13,7 +14,7 @@ Cache::Cache(int associativity, bool verbose)
 Cache::~Cache()
 {
 	// delete dynamic variables
-	for (int i = 0; i < NUM_SETS; i++)
+	for (int i = 0; i < setSize; i++)
 	{
 		delete set[i];
 	}
@@ -60,7 +61,7 @@ int Cache::readDataToL2(int address)
 int Cache::resetAll()
 {
 	int failures = 0;
-	for( int i = NUM_SETS; i>0; --i)
+	for( int i = setSize; i>0; --i)
 	{
 		if( sets[ i].reset() ) //expects a 0 for normal, -1 (or any value but 0) for failure
 			--failures;
@@ -71,7 +72,7 @@ int Cache::resetAll()
 int Caches::printCache()
 {
 	int setsContainingData = 0;
-	for( int i = NUM_SETS; i>0; --i)
+	for( int i = setSize; i>0; --i)
 	{
 		setsContainingData = setsContainingData + sets[ i].print();
 	}
@@ -85,7 +86,7 @@ int Caches::printCache()
 int Caches::clearCache()
 {
 	int failures = 0;
-	for( int i = NUM_SETS; i>0; --i)
+	for( int i = setSize; i>0; --i)
 	{
 		if( sets[ i].clear() ) //expects a 0 for normal, -1 (or any value but 0) for failure
 			--failures;
