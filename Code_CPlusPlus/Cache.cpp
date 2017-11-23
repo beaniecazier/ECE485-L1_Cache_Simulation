@@ -1,18 +1,23 @@
 #include "Cache.h"
 
-
 Cache::Cache(int associativity, bool verbose)
 {
-	
-	for each (Set set in sets) //classes are defined with uppercase; sets is a variable
+	this.verbose = verbose;
+	sets = new Set[NUM_SETS];
+	for (int i = 0; i < NUM_SETS; i++) //classes are defined with uppercase; sets is a variable
 	{
-		set = new Set(associativity, verbose);
+		sets[i] = new Set(associativity, verbose);
 	}
 }
 
 Cache::~Cache()
 {
-	//delete everything!! Maybe?
+	// delete dynamic variables
+	for (int i = 0; i < NUM_SETS; i++)
+	{
+		delete set[i];
+	}
+	delete [] sets;
 }
 
 
