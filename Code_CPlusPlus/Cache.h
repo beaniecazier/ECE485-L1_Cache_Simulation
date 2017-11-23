@@ -22,11 +22,17 @@ public:
 	int resetAll();
 	int printCache();
 	int clearCache();
+	void printStatistics();
 
 private:
 	Set* sets;
 	int setSize;
 	bool verbose;
+	int HitCount;
+	int MissCount;
+	int CacheReads;
+	int CacheWrites;
+	long totalOperations;
 	
 	int getIndex(int address);
 	int getTag(int address); //pass this to Dustin
