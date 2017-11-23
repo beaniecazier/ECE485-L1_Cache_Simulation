@@ -30,7 +30,7 @@ public:
 
 private:
 	// 16k sets
-	Set sets[NUM_SETS];
+	Set* sets;
 	
 	//put variables here
 	bool verbose;
