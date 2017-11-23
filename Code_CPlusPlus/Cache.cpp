@@ -3,8 +3,14 @@
 Cache::Cache(int setSize, int associativity, bool verbose)
 {
 	this.setSize = setSize;
+	this.associativity = associativity;
 	this.verbose = verbose;
 	sets = new Set[setSize];
+	HitCount = 0;
+	MissCount = 0;
+	CacheReads = 0;
+	CacheWrites = 0;
+	totalOperations = 0;
 	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
 	{
 		sets[i] = new Set(associativity, verbose);
@@ -40,6 +46,7 @@ int Cache::getTag(int address)
 //Public function definitions here
 int Cache::readData(int address)
 {
+	totalOperations++;
 	return sets[ getIndex( address) ].read( getTag( address) );
 }
 
@@ -69,21 +76,23 @@ int Cache::resetAll()
 	return failures; //0 if no failues, a negative number for the number of failures.
 }
 
-int Caches::printCache()
+void Cache::printCache()
 {
-	int setsContainingData = 0;
-	for( int i = setSize; i>0; --i)
+	for( int i = 0; i < setSize; i++)
 	{
-		setsContainingData = setsContainingData + sets[ i].print();
+		cout << i
+		sets[ i].print();
 	}
-	return setsContainingData; //0 if no sets contain data
-	//If sets.print passes back a 1 when that set contains data, then the return value for this function
-	//will be number of sets containing data
-	//If sets.print instead passes back the number of ways in that set which contain data, then the return 
-	//value for this function will be the number of total ways across the cache that contain data.
 }
 
-int Caches::clearCache()
+void Cahche::printStatistics()
+{
+	cout << "Out of " << totalOperations << " total operations\n"
+		 << "There were " << CacheReads << " cache reads and " << CacheWrites << " cache writes\n";
+		 << "The hit and miss rate was " << HitCount << " and " << MissCount << "\n";
+}
+
+int Cache::clearCache()
 {
 	int failures = 0;
 	for( int i = setSize; i>0; --i)
@@ -93,10 +102,3 @@ int Caches::clearCache()
 	}
 	return failures; //0 if no failues, a negative number for the number of failures.
 }
-
-
-
-
-
-				     
-				     
