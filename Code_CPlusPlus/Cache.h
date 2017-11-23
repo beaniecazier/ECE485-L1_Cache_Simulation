@@ -1,9 +1,6 @@
 #include "Set.h"
 #include <math.h>
 
-#include "Set.h"
-#include <math.h>
-
 #ifndef CACHE_H_20171123
 #define CACHE_H_20171123
 
