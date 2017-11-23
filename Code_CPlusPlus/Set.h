@@ -1,17 +1,5 @@
-enum MESI
-{
-	MODIFIED = 0,
-	INVALID = 1,
-	SHARED = 2,
-	EXCLUSIVE = 3,
-};
-
-struct Line 
-{
-	int tag;
-	int LRU;
-	MESI mesi;
-}
+#ifndef CACHE_H_20171123
+#define CACHE_H_20171123
 
 class Set
 {
@@ -23,3 +11,4 @@ private:
 	Line* lines;
 	bool verbose;
 };
+#endif SET_H_20171123
