@@ -10,3 +10,10 @@ Line::Line()
 Line::~Line()
 {
 }
+
+Line::Invalidate()
+{
+	mesi = MESI.INVALID;
+	LRU = -1;
+	tag = -1;
+}
