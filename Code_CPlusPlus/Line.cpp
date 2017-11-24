@@ -11,9 +11,13 @@ Line::~Line()
 {
 }
 
-Line::Invalidate()
+void Line::invalidate()
 {
 	mesi = MESI.INVALID;
 	LRU = -1;
 	tag = -1;
+}
+
+void Line::print()
+{
 }
