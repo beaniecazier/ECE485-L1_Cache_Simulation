@@ -1,7 +1,7 @@
 #include "Line.h"
 
-#ifndef CACHE_H_20171123
-#define CACHE_H_20171123
+#ifndef SET_H_20171123
+#define SET_H_20171123
 class Set
 {
 public:
