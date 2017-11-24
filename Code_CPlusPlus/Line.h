@@ -14,9 +14,10 @@ class Line
 public:
 	Line();
 	~Line();
-  
-private:
+	void Invalidate();
+	
 	int tag;
 	int LRU;
 	MESI mesi;
+private:
 }
