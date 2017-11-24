@@ -14,7 +14,8 @@ class Line
 public:
 	Line();
 	~Line();
-	void Invalidate();
+	void invalidate();
+	void print();
 	
 	int tag;
 	int LRU;
