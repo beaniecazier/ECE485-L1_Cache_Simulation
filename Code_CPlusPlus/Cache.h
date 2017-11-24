@@ -20,7 +20,7 @@ public:
 	int invalidataData(int address);
 	int readDataToL2(int address);
 	int resetAll();
-	int printCache();
+	void printCache();
 	int clearCache();
 	void printStatistics();
 
