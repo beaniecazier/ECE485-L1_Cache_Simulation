@@ -1,4 +1,6 @@
 #include "Line.h"
+#define MISS 0
+#define HIT 1
 
 #ifndef SET_H_20171123
 #define SET_H_20171123
@@ -6,14 +8,15 @@ class Set
 {
 public:
 	//Constructor and deconstructor function
-	Set(int associativity);
+	Set(int a, bool v);
 	~Set();
 
 	//Public functions
-	void read(int tag);
-	void write(int tag);
+	int read(int tag);
+	int write(int tag);
+	void invalidate();
 	void invalidate(int tag);
-	void readFromL2();
+	int readFromL2(int tag);
 	void reset();
 	void print();
 
@@ -25,12 +28,14 @@ private:
 	Line* lines;
 	int associativity;
 	bool verbose;
-	
+	int count;
+
 	//Private functions
-	void updateLRU();
-	void checkLRU();
-	bool findSpot();
-	void evict();
-	void updateMESI();
+	void updateLRU(int tag);
+	int checkLRU();
+	void readEvict();
+	void handleWriteMiss(int tag);
+	void writeEvict();
+	bool isFull();
 };
 #endif SET_H_20171123

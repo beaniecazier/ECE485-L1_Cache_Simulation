@@ -15,10 +15,12 @@ public:
 	Line();
 	~Line();
 	void invalidate();
-	void print();
+	std::string printMESI();
 	
 	int tag;
 	int LRU;
 	MESI mesi;
 private:
 }
+
+#endif
