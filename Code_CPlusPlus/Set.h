@@ -12,11 +12,11 @@ public:
 	~Set();
 
 	//Public functions
-	int read(int tag);
-	int write(int tag);
-	void invalidate();
-	void invalidate(int tag);
-	int readFromL2(int tag);
+	int read(int tag, int address);
+	int write(int tag, int address);
+	void invalidate(int address);
+	void invalidate(int tag, int address);
+	int readFromL2(int tag, int address);
 	void reset();
 	void print();
 
@@ -33,8 +33,8 @@ private:
 	//Private functions
 	void updateLRU(int tag);
 	int checkLRU();
-	void readEvict();
-	void handleWriteMiss(int tag);
+	void readEvict(int address);
+	void handleWriteMiss(int tag, int address);
 	void writeEvict();
 	bool isFull();
 };

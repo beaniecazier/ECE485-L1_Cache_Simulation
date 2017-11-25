@@ -24,7 +24,7 @@ Set::~Set()
  	delete [] lines;
 }
 
-int Set::read(int tag)
+int Set::read(int tag, int address)
 {
 	//Check for a valid in the set of data
 	if (count > 0)
@@ -42,7 +42,7 @@ int Set::read(int tag)
 		}
 		if (isFull())
 		{
-			readEvict();
+			readEvict(address);
 		}
 		if (verbose)
 		{
@@ -72,11 +72,11 @@ int Set::read(int tag)
 	return 0;
 }
 
-int Set::write(int tag)
+int Set::write(int tag, int address)
 {
 	if (count == 0)		// if invalid set
 	{
-		handleWriteMiss(tag);
+		handleWriteMiss(tag, address);
 		return MISS;
 	}
 	else
@@ -94,11 +94,11 @@ int Set::write(int tag)
 		{
 			writeEvict();
 		}
-		handleWriteMiss(tag);
+		handleWriteMiss(tag, address);
 	}
 }
 
-void Set::handleWriteMiss(int tag)
+void Set::handleWriteMiss(int tag, int address)
 {
 	for (int i = 0; i < associativity; i++)
 	{
@@ -128,7 +128,7 @@ void Set::handleWriteMiss(int tag)
 	}
 }
 
-void Set::invalidate(int tag)
+void Set::invalidate(int tag, int address)
 {
 	for(int i = 0; i < associativity; i++)
 	{
@@ -161,15 +161,15 @@ void Set::invalidate(int tag)
 	}
 }
 
-void Set::invalidate()
+void Set::invalidate(int address)
 {
 	for(int i = 0; i < associativity; i++)
 	{
-		invalidate(lines[i].tag);
+		invalidate(lines[i].tag, address);
 	}
 }
 
-int Set::readFromL2(int tag)
+int Set::readFromL2(int tag, int address)
 {
 	// called on 4
 	// have to set mesi to shared
@@ -236,7 +236,7 @@ int Set::checkLRU()
 	}
 }
 
-void Set::readEvict()
+void Set::readEvict(int address)
 {
 	if (verbose)
 	{
@@ -264,4 +264,3 @@ bool Set::isFull()
 	}
 	return (count > 0) ? false : true;
 }
-
