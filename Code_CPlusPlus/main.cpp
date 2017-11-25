@@ -64,6 +64,16 @@ int main(int argc, char* argv[])
 
 bool checkFlags(char* arg)
 {
+	const char* s = arg;
+	std::string str(s);
+	if (s.find("-D") == string::npos)
+	{
+		if (str.length == 2)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void ResetCache()
