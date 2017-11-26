@@ -50,31 +50,35 @@ void Cache::readData(int address)
 {
 	totalOperations++;
 	CacheReads++;
-	int hit = sets[ getIndex( address) ].read( getTag( address) );
+	int hit = sets[getIndex(address)].read(getTag(address), address);
 	HitCount += (hit) ? 1: 0;
 	MissCount += (!hit) ? 1 : 0;
 }
 
 void Cache::writeData(int address)
 {
-	int hit = sets[ getIndex( address) ].write( getTag( address) );
+	int hit = sets[ getIndex( address) ].write( getTag( address), address);
 	totalOperations++;
 	CacheWrites++;
 	HitCount += (hit) ? 1 : 0;
 	MissCount += (!hit) ? 1 : 0;
 }
 
-int Cache::invalidate(int address)
+void Cache::invalidate(int address)
 {
 	sets[ getIndex( address) ].invalidate( getTag( address) );
 }
 
-int Cache::readFromL2(int address)
+void Cache::readFromL2(int address)
 {
-	return sets[ getIndex( address) ].readFromL2( getTag( address) );
+	int hit = sets[ getIndex( address) ].readFromL2( getTag( address), address);
+	totalOperations++;
+	CacheWrites++;
+	HitCount += (hit) ? 1 : 0;
+	MissCount += (!hit) ? 1 : 0;
 }
 
-int Cache::resetAll()
+void Cache::resetAll()
 {
 	for (int i = setSize; i > 0; --i)
 	{
@@ -91,7 +95,7 @@ void Cache::printCache()
 {
 	for( int i = 0; i < setSize; i++)
 	{
-		cout << i
+		cout << i;
 		sets[ i].print();
 	}
 }

@@ -4,6 +4,7 @@
 
 #ifndef SET_H_20171123
 #define SET_H_20171123
+
 class Set
 {
 public:

@@ -1,3 +1,7 @@
+#include <string>
+
+using namespace std;
+
 #ifndef LINE_H_20171123
 #define LINE_H_20171123
 
@@ -15,12 +19,12 @@ public:
 	Line();
 	~Line();
 	void invalidate();
-	std::string printMESI();
+	string printMESI();
 	
 	int tag;
 	int LRU;
 	MESI mesi;
 private:
-}
+};
 
 #endif

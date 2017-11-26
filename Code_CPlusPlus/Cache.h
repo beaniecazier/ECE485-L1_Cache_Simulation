@@ -17,9 +17,9 @@ public:
 	//public function declarations (primitives, prototypes)
 	void readData(int address);
 	void writeData(int address);
-	int invalidate(int address);
-	int readFromL2(int address);
-	int resetAll();
+	void invalidate(int address);
+	void readFromL2(int address);
+	void resetAll();
 	void printCache();
 	void printStatistics();
 

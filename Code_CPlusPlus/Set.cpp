@@ -189,7 +189,7 @@ void Set::reset()
 {
 	for (int i = 0; i < associativity; i++)
 	{
-		lines[i].invalidate;
+		lines[i].invalidate();
 	}
 }
 
@@ -242,13 +242,13 @@ void Set::readEvict(int address)
 	{
 		// write message
 	}
-	lines[checkLRU()].invalidate;
+	lines[checkLRU()].invalidate();
 	count--;
 }
 
 void Set::writeEvict()
 {
-	lines[checkLRU()].invalidate;
+	lines[checkLRU()].invalidate();
 	count--;
 }
 

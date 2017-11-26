@@ -16,6 +16,8 @@ using namespace std;
 #define DATA_ASSOC	4
 
 void ResetCache();
+bool checkFlags(char* arg, string flag);
+void printCaches();
 
 Cache* instructionCache;
 Cache* dataCache;
@@ -25,31 +27,83 @@ int main(int argc, char* argv[])
 	string line;
 	ifstream file;
 	bool verbose = false;
+	int count = 0;
 	
 	for (int i = 0; i < argc; i++)
 	{
-		verbose |= checkFlags(argv[i]);
+		verbose = verbose | checkFlags(argv[i], "-D");
 	}
 
-	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC);
-	dataCache = new Cache(NUM_SETS, DATA_ASSOC);
+	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC, verbose);
+	dataCache = new Cache(NUM_SETS, DATA_ASSOC, verbose);
+
+	verbose = false;
+	for (int i = 0; i < argc; i++)
+	{
+		verbose = verbose | checkFlags(argv[i], "-A");
+	}
+
+	verbose = true;
 
 	try
 	{
-		file.open(argv[1]);
+		file.open(/*argv[1]*/"traceFile.txt");
 		if (file.is_open())
 		{
 			while (getline(file, line))
 			{
 				istringstream iss(line);
-				int a, b;
+				int instruction, address;
 				// process pair (a,b)
-				if (!(iss >> a >> hex >> b)) { break; } // error
+				if (!(iss >> instruction >> hex >> address)) { break; } // error
 
-
-														// this is were we actually handle cache instructions
-				cout << a << ',' << hex << b << '\n';
+				// this is were we actually handle cache instructions
+				//cout << a << ',' << hex << b << '\n';
 				//
+
+				switch (instruction)
+				{
+				case 0:
+					//read data
+					dataCache->readData(address);
+					break;
+				case 1:
+					// write data
+					dataCache->writeData(address);
+					break;
+				case 2:
+					// instruction fetch
+					// instruction read
+					instructionCache->readData(address);
+					break;
+				case 3:
+					// invalidate
+					dataCache->invalidate(address);
+					break;
+				case 4:
+					dataCache->readFromL2(address);
+					break;
+				case 8:
+					// clear reset
+					dataCache->resetAll();
+					instructionCache->resetAll();
+					break;
+				case 9:
+					// print all
+					instructionCache->printCache();
+					dataCache->printCache();
+					break;
+				default:
+					cout << instruction << " found at line " << count << ", is not a valid instruction for a cache" << endl;
+					break;
+				}
+				count++;
+
+				if (verbose)
+				{
+					instructionCache->printCache();
+					dataCache->printCache();
+				}
 			}
 		}
 	}
@@ -57,18 +111,25 @@ int main(int argc, char* argv[])
 	{
 		cout << e.what() << "\n\n";
 	}
-
+	instructionCache->printStatistics();
+	dataCache->printStatistics();
 	file.close();
+	getchar();
 	return 0;
 }
 
-bool checkFlags(char* arg)
+void printCaches()
+{
+}
+
+bool checkFlags(char* arg, string flag)
 {
 	const char* s = arg;
-	std::string str(s);
-	if (s.find("-D") == string::npos)
+	string str = string(s);
+	if (str.find(flag) == string::npos)
 	{
-		if (str.length == 2)
+		int len = str.length();
+		if (len == 2)
 		{
 			return true;
 		}
@@ -78,12 +139,6 @@ bool checkFlags(char* arg)
 
 void ResetCache()
 {
-	if (instructionCache->resetAll() < 0)
-	{
-		cout << "ERROR RESETING INSTRUCTION CACHE\n";
-	}
-	if (dataCache->resetAll() < 0)
-	{
-		cout << "ERROR RESETING DATA CACHE\n";
-	}
+	instructionCache->resetAll();
+	dataCache->resetAll();
 }
