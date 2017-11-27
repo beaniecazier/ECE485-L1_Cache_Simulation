@@ -9,6 +9,7 @@ class Set
 {
 public:
 	//Constructor and deconstructor function
+	Set() {};
 	Set(int a, bool v);
 	~Set();
 

@@ -24,7 +24,7 @@ public:
 	void printStatistics();
 
 private:
-	Set* sets;
+	Set** sets;
 	int setSize;
 	int associativity;
 	bool verbose;
