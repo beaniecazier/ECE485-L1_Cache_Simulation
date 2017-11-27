@@ -9,25 +9,25 @@ Cache::Cache(int size, int a, bool v)
 	setSize = size;
 	associativity = a;
 	verbose = v;
-	//sets = new Set(a, v)[setSize];
+	sets = new Set*[setSize];
 	HitCount = 0;
 	MissCount = 0;
 	CacheReads = 0;
 	CacheWrites = 0;
 	totalOperations = 0;
-	//for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
-	//{
-		//sets[i] = new Set(associativity, verbose);
-	//}
+	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
+	{
+		sets[i] = new Set(associativity, verbose);
+	}
 }
 
 Cache::~Cache()
 {
 	// delete dynamic variables
-	//for (int i = 0; i < setSize; i++)
-	//{
-		//delete set[i];
-	//}
+	for (int i = 0; i < setSize; i++)
+	{
+		delete sets[i];
+	}
 	delete [] sets;
 }
 
@@ -51,14 +51,14 @@ void Cache::readData(int address)
 {
 	totalOperations++;
 	CacheReads++;
-	int hit = sets[getIndex(address)].read(getTag(address), address);
+	int hit = sets[getIndex(address)]->read(getTag(address), address);
 	HitCount += (hit) ? 1: 0;
 	MissCount += (!hit) ? 1 : 0;
 }
 
 void Cache::writeData(int address)
 {
-	int hit = sets[ getIndex( address) ].write( getTag( address), address);
+	int hit = sets[ getIndex( address) ]->write( getTag( address), address);
 	totalOperations++;
 	CacheWrites++;
 	HitCount += (hit) ? 1 : 0;
@@ -67,12 +67,12 @@ void Cache::writeData(int address)
 
 void Cache::invalidate(int address)
 {
-	sets[ getIndex( address) ].invalidate( getTag( address) );
+	sets[ getIndex( address) ]->invalidate( getTag( address) );
 }
 
 void Cache::readFromL2(int address)
 {
-	int hit = sets[ getIndex( address) ].readFromL2( getTag( address), address);
+	int hit = sets[ getIndex( address) ]->readFromL2( getTag( address), address);
 	totalOperations++;
 	CacheWrites++;
 	HitCount += (hit) ? 1 : 0;
@@ -83,7 +83,7 @@ void Cache::resetAll()
 {
 	for (int i = setSize; i > 0; --i)
 	{
-		sets[i].reset();
+		sets[i]->reset();
 	}
 	totalOperations = 0;
 	CacheReads = 0;
@@ -97,7 +97,7 @@ void Cache::printCache()
 	cout << setw(7) << "INDEX" << "\t" << setfill(' ') << setw(3) << "LRU" << setw(7) << "TAG" << setw(10) << "MESI";
 	for( int i = 0; i < setSize; i++)
 	{
-		sets[ i].print(i);
+		sets[ i]->print(i);
 	}
 }
 

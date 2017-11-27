@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
 		verbose = verbose | checkFlags(argv[i], "-D");
 	}
 
+	verbose = true;
+
 	cout << "Initializing Instruction Cache\n";
 	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC, verbose);
 	cout << "Initializing Data Cache\n";
@@ -50,10 +52,10 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		file.open(argv[1]);
+		file.open(/*argv[1]*/"traceFile.txt");
 		if (file.is_open())
 		{
-			if (verbose) cout << argv[1] << " was opened successfully\n";
+			//if (verbose) cout << argv[1] << " was opened successfully\n";
 			while (getline(file, line))
 			{
 				istringstream iss(line);
@@ -62,7 +64,7 @@ int main(int argc, char* argv[])
 				if (!(iss >> instruction >> hex >> address)) { break; } // error
 
 				// this is were we actually handle cache instructions
-				cout << instruction << ',' << hex << address << '\n';
+				if (verbose) cout << instruction << ',' << hex << address << '\n';
 
 				switch (instruction)
 				{
