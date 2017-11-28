@@ -1,0 +1,82 @@
+Read function high level algorithm:
+Check for a valid in the set of data
+If valid data, loop through the line of data for the set
+	Check to see if any of the tags in the set match
+	If, MESI is not invalid and tags match
+		Read the data and update the LRU bits
+		Return a hit
+	Else if, check to see if the line of data is full
+		If the line is full, find a line to evict
+			Check the for the least recently used line to evict
+			Write back the evicted line to L2
+		Read data from L2
+	Else, find an empty slot in the set
+		Check for an invalid line
+		If, the line is invalid
+			Write the tag to the invalid slot
+			Check the MESI for the tag to shared
+			Increase the valid count
+Else invalid data for the whole set,
+	Read the data in from L2
+	Set the line to shared
+	Increase the valid count
+Update the LRU bits
+Return from read function
+
+Write data high level algorithm:
+Check to see it if the set is invalid
+	If the set is invalid, handle the write miss
+		Loop through set of data and check for invalid line
+			If the line is invalid,
+				Read from L2
+				Set the MESI to shared for the line
+				Write to L2
+				Set the MESI to exclusive for the line
+				Update the LRU bits for the set
+				Increase the valid count
+				Return form handling write miss
+			Return miss
+	Else, check for valid lines in the set
+		Check to see if the tags match
+		If the tags match,
+			Write to the line and set MESI for the line to modified
+			Update the LRU bits for the set
+			Return a hit
+		Check to see if the set is full
+		If the line is full,
+			Handle a write eviction
+			Evict the least recently used line and invalidate it
+			Decrement the valid count
+		Handle the write miss
+		Loop through set of data and check for invalid line
+			If the line is invalid,
+				Read from L2
+				Set the MESI to shared for the line
+				Write to L2
+				Set the MESI to exclusive for the line
+				Update the LRU bits for the set
+				Increase the valid count
+				Return form handling write miss
+
+Invalidate High Level Algorithm:
+Loop through the lines in the set 
+Check to see if the tag matches the line
+	If the tag matches,
+		Check the MESI state for the line
+		Case of modified and exclusive
+			Write to the L2
+			Break
+		Case of shared
+			Break
+		Invalidate the line
+		Decrement the count
+
+Read from L2 High Level Algorithm:
+Loop through the lines in the set
+Check to see if the tag matches the line
+	If the tag matches
+		Check to see if the line has been modified
+		If the line is in the modified state
+			Return data to L2
+		Set the MESI state to shared
+		Return a hit
