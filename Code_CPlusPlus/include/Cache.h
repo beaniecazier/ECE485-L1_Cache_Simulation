@@ -34,8 +34,8 @@ private:
 	int CacheWrites;
 	long totalOperations;
 	
-	int getIndex(int address);
-	int getTag(int address); //pass this to Dustin
+	unsigned int getIndex(unsigned int address);
+	unsigned int getTag(unsigned int address); //pass this to Dustin
 };
 
 
