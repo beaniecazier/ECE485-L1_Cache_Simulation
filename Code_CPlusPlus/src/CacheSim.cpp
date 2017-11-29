@@ -59,9 +59,25 @@ int main(int argc, char* argv[])
 			while (getline(file, line))
 			{
 				istringstream iss(line);
-				int instruction, address;
+				unsigned int instruction, address;
+				count++;
 				// process pair (a,b)
-				if (!(iss >> instruction >> hex >> address)) { break; } // error
+				//if (!(iss >> instruction >> hex >> address)) { break; } // error
+				if (!(iss >> instruction))
+				{
+					cerr << "failed to read instruction code at line: " << count << endl;
+					break;
+				}
+				else if (instruction < 0 || instruction > 4 && instruction < 8 || instruction > 9)
+				{
+					cerr << "not actual code, skipping instruction code and address at line: " << count << endl;
+					break;
+				}
+				else if ((instruction != 9 || instruction != 8) && !(iss >> hex >> address))
+				{
+					cerr << "ignoring address after instruction code: " << instruction << ", THIS IS NOT AN ACTUAL ERROR\n";
+					break;
+				}
 
 				// this is were we actually handle cache instructions
 				if (verbose) cout << instruction << ',' << hex << address << '\n';
@@ -84,6 +100,7 @@ int main(int argc, char* argv[])
 				case 3:
 					// invalidate
 					dataCache->invalidate(address);
+					instructionCache->invalidate(address);
 					break;
 				case 4:
 					dataCache->readFromL2(address);
@@ -101,7 +118,6 @@ int main(int argc, char* argv[])
 					cout << instruction << " found at line " << count << ", is not a valid instruction for a cache" << endl;
 					break;
 				}
-				count++;
 
 				if (verbose)
 				{

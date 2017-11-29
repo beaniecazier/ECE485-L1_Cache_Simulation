@@ -57,6 +57,8 @@ int Set::read(int tag, int address)
 				lines[i].tag = tag;
 				lines[i].mesi = SHARED;
 				count++;
+				updateLRU(tag);
+				return 0;
 			}
 		}
 	} 
@@ -70,8 +72,8 @@ int Set::read(int tag, int address)
 			cout << "Read from L2 " << hex << address << endl;
 		}
 		count++;
+		lines[0].LRU = 0;
 	}
-	updateLRU(tag);
 	return 0;
 }
 
@@ -232,15 +234,16 @@ void Set::updateLRU(int tag)
 		if (lines[i].mesi != INVALID && lines[i].tag == tag)
 		{
 			lastLRU = lines[i].LRU;
-			lines[i].LRU = count -1;
+			break;
 		}
 	}
+	lines[lastLRU].LRU = 0;
 	//update other most recently used lines
 	for (int i = 0; i < associativity; i++)
 	{
 		if (lines[i].mesi != INVALID && lines[i].LRU > lastLRU && lines[i].tag != tag)
 		{
-			lines[i].LRU--;
+			lines[i].LRU++;
 		}
 	}
 }
