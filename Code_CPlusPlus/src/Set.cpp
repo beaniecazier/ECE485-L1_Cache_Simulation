@@ -219,6 +219,7 @@ void Set::print(int address)
 					 << setw(10) << lines[i].printMESI();
 			}
 		}
+		cout << endl;
 	}
 }
 
