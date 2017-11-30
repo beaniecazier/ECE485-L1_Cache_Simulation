@@ -13,6 +13,12 @@ using namespace std;
 #define INSTR_ASSOC	2
 #define DATA_ASSOC	4
 
+#ifdef LINUX
+bool linuxOp = true;
+#else
+bool linuxOp = false;
+#endif
+
 void ResetCache();
 bool checkFlags(char* arg, string flag);
 void printCaches();
@@ -25,28 +31,26 @@ int main(int argc, char* argv[])
 {
 	string line;
 	ifstream file;
-	bool verbose = false;
+	bool debug = false;
+	bool verbose = false;hello.dll
 	int count = 0;
 	
 	for (int i = 0; i < argc; i++)
 	{
-		verbose = verbose | checkFlags(argv[i], "-D");
+		debug = debug | checkFlags(argv[i], "-D");
+		debug = debug | checkFlags(argv[i], "-d");
 	}
-
-	cout << "Initializing Instruction Cache\n";
-	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC, verbose);
-	cout << "Initializing Data Cache\n";
-	dataCache = new Cache(NUM_SETS, DATA_ASSOC, verbose);
-
-	verbose = false;
 	for (int i = 0; i < argc; i++)
 	{
 		verbose = verbose | checkFlags(argv[i], "-A");
+		verbose = verbose | checkFlags(argv[i], "-a");
 	}
-
-	verbose = true;
+	cout << "Initializing Instruction Cache\n";
+	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC, debug);
+	cout << "Initializing Data Cache\n\n";
+	dataCache = new Cache(NUM_SETS, DATA_ASSOC, debug);
 	
-	if (verbose) cout << "Opening file\n";
+	if (verbose) cout << "Opening file\n";hello.dll
 
 	try
 	{
@@ -57,16 +61,26 @@ int main(int argc, char* argv[])
 			while (getline(file, line))
 			{
 				istringstream iss(line);
-				int instruction, address;
-				// process pair (a,b)
-				if (!(iss >> instruction >> hex >> address)) { break; } // error
+				unsigned int instruction, address;
+				count++;
+				if (!(iss >> instruction))
+				{
+					cerr << "failed to read instruction code at line: " << count << endl << endl;
+					continue;
+				}
+				else if (instruction < 0 || instruction > 4 && instruction < 8 || instruction > 9)
+				{
+					cerr << "not actual code, skipping instruction code and address at line: " << count << endl << endl;
+					continue;
+				}
+				else if ((instruction != 9 || instruction != 8) && !(iss >> hex >> address))
+				{
+					cerr << "ignoring address after instruction code: " << instruction << ", THIS IS NOT AN ACTUAL ERROR\n\n";
+				}
 
 				// this is were we actually handle cache instructions
-				if (verbose)
-				{
-					cout << instruction << ',' << hex << address << '\n';
-				}
-				
+				if (verbose) cout << endl << instruction << ',' << hex << address << '\n';
+
 				switch (instruction)
 				{
 				case 0:
@@ -85,6 +99,7 @@ int main(int argc, char* argv[])
 				case 3:
 					// invalidate
 					dataCache->invalidate(address);
+					instructionCache->invalidate(address);
 					break;
 				case 4:
 					dataCache->readFromL2(address);
@@ -97,16 +112,24 @@ int main(int argc, char* argv[])
 				case 9:
 					// print all
 					printCaches();
-					break;
+					continue;
 				default:
 					cout << instruction << " found at line " << count << ", is not a valid instruction for a cache" << endl;
 					break;
 				}
-				count++;
 
 				if (verbose)
 				{
+					cout << endl;
 					printCaches();
+					cout << endl;
+					char next = getchar();
+					if (next == 'Q' || next == 'q' || next == '')
+					{
+						cout << "Now terminating simulation\n\n";
+						break;
+					}
+					cout << next << endl;
 				}
 			}
 		}
@@ -115,9 +138,11 @@ int main(int argc, char* argv[])
 	{
 		cout << e.what() << "\n\n";
 	}
+	cout << "\n\nCACHE SIMULATION HAS ENDED\nNOW PRINTING FINAL CACHE CONTENTS AND STATISTICS\n\n";
+	printCaches();
 	printCachesStats();
 	file.close();
-	getchar();
+	if (!linuxOp) getchar();
 	return 0;
 }
 
@@ -125,7 +150,7 @@ void printCaches()
 {
 	cout << "Here is are the valid contents of the L1 Instruction Cache\n";
 	instructionCache->printCache();
-	cout << "\n\n";
+	cout << "\n";
 	cout << "Here is are the valid contents of the L1 Data Cache\n";
 	dataCache->printCache();
 	cout << "\n\n";
@@ -141,17 +166,8 @@ void printCachesStats()
 
 bool checkFlags(char* arg, string flag)
 {
-	const char* s = arg;
-	string str = string(s);
-	if (str.find(flag) == string::npos)
-	{
-		int len = str.length();
-		if (len == 2)
-		{
-			return true;
-		}
-	}
-	return false;
+	string str = string(arg);
+	return str == flag;
 }
 
 void ResetCache()

@@ -9,6 +9,7 @@ class Set
 {
 public:
 	//Constructor and deconstructor function
+	Set() {};
 	Set(int a, bool v);
 	~Set();
 
@@ -19,7 +20,7 @@ public:
 	void invalidate(int tag, int address);
 	int readFromL2(int tag, int address);
 	void reset();
-	void print(int address);
+	void print(int index);
 
 private:
 	//Private variables
@@ -35,5 +36,6 @@ private:
 	void handleWriteMiss(int tag, int address);
 	void writeEvict();
 	bool isFull();
+	std::string htos(int n);
 };
 #endif SET_H_20171123

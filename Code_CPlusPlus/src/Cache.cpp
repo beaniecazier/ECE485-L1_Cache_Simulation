@@ -9,37 +9,37 @@ Cache::Cache(int size, int a, bool v)
 	setSize = size;
 	associativity = a;
 	verbose = v;
-	//sets = new Set(a, v)[setSize];
+	sets = new Set*[setSize];
 	HitCount = 0;
 	MissCount = 0;
 	CacheReads = 0;
 	CacheWrites = 0;
 	totalOperations = 0;
-	//for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
-	//{
-		//sets[i] = new Set(associativity, verbose);
-	//}
+	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
+	{
+		sets[i] = new Set(associativity, verbose);
+	}
 }
 
 Cache::~Cache()
 {
 	// delete dynamic variables
-	//for (int i = 0; i < setSize; i++)
-	//{
-		//delete set[i];
-	//}
+	for (int i = 0; i < setSize; i++)
+	{
+		delete sets[i];
+	}
 	delete [] sets;
 }
 
 //Private function definitions here
-int Cache::getIndex(int address)
+unsigned int Cache::getIndex(unsigned int address)
 {
 	address = address << TAG_BITS; //bitshift to left to erase tag bits
 	return address = address >> (TAG_BITS + OFFSET_BITS); //bitshift to right to erase offset bits and 
 							     //shift index bits back into position.
 }
 
-int Cache::getTag(int address)
+unsigned int Cache::getTag(unsigned int address)
 {
 	//bitshift to the right 20 bits (32 proc bits - 12 tag bits)
 	int shiftAmount = (PROC_SIZE - TAG_BITS);
@@ -51,39 +51,48 @@ void Cache::readData(int address)
 {
 	totalOperations++;
 	CacheReads++;
-	int hit = sets[getIndex(address)].read(getTag(address), address);
+	unsigned int tag = getTag(address);
+	unsigned int index = getIndex(address);
+	if (verbose) cout << "INDEX: " << hex << index << ", TAG: " << hex << tag << endl;
+	int hit = sets[index]->read(tag, address);
 	HitCount += (hit) ? 1: 0;
 	MissCount += (!hit) ? 1 : 0;
+	if (verbose) cout << endl;
 }
 
 void Cache::writeData(int address)
 {
-	int hit = sets[ getIndex( address) ].write( getTag( address), address);
+	unsigned int tag = getTag(address);
+	unsigned int index = getIndex(address);
 	totalOperations++;
 	CacheWrites++;
+	if (verbose) cout << "INDEX: " << hex << index << ", TAG: " << hex << tag << endl;
+	int hit = sets[index]->write(tag, address);
 	HitCount += (hit) ? 1 : 0;
 	MissCount += (!hit) ? 1 : 0;
+	if (verbose) cout << endl;
 }
 
 void Cache::invalidate(int address)
 {
-	sets[ getIndex( address) ].invalidate( getTag( address) );
+	sets[ getIndex( address) ]->invalidate( getTag( address) );
 }
 
 void Cache::readFromL2(int address)
 {
-	int hit = sets[ getIndex( address) ].readFromL2( getTag( address), address);
+	int hit = sets[ getIndex( address) ]->readFromL2( getTag( address), address);
 	totalOperations++;
 	CacheWrites++;
 	HitCount += (hit) ? 1 : 0;
 	MissCount += (!hit) ? 1 : 0;
+	if (verbose) cout << endl;
 }
 
 void Cache::resetAll()
 {
 	for (int i = setSize; i > 0; --i)
 	{
-		sets[i].reset();
+		sets[i]->reset();
 	}
 	totalOperations = 0;
 	CacheReads = 0;
@@ -94,11 +103,24 @@ void Cache::resetAll()
 
 void Cache::printCache()
 {
-	cout << setw(7) << "INDEX" << "\t" << setfill(' ') << setw(3) << "LRU" << setw(7) << "TAG" << setw(10) << "MESI";
+	cout << setw(7) << "INDEX" << setfill(' ') << "\t | ";
+    for (int i = 0; i < associativity; i++)
+	{
+		cout << setw(7) << "TAG" << " : ";
+		cout << setw(4) << "LRU" << " : ";  
+		cout << setw(10) << "MESI" << " | ";;
+	}
+	cout << "\n-------\t---";
+	for (int i = 0; i < associativity; i++)
+	{
+		cout << "------------------------------";
+	}
+	cout << endl;
 	for( int i = 0; i < setSize; i++)
 	{
-		sets[ i].print(i);
+		sets[ i]->print(i);
 	}
+	cout << endl;
 }
 
 void Cache::printStatistics()
@@ -108,5 +130,5 @@ void Cache::printStatistics()
 	
 	cout << "out of " << totalOperations << " total operations\n"
 		 << "There were " << CacheReads << " cache reads and " << CacheWrites << " cache writes\n"
-		 << "The hit and miss rate was " << setprecision(2) << hitRate << " and " << missRate << "\n";
+		 << "The hit and miss rate was " << setprecision(3) << hitRate << "% and " << missRate << "%\n";
 }

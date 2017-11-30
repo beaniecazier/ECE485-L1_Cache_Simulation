@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -48,6 +49,7 @@ int Set::read(int tag, int address)
 		if (verbose)
 		{
 			//read from L2
+			cout << "Read from L2 " << hex << address << endl;
 		}
 		for (int i = 0; i < associativity; i++)
 		{
@@ -55,7 +57,6 @@ int Set::read(int tag, int address)
 			{
 				lines[i].tag = tag;
 				lines[i].mesi = SHARED;
-				count++;
 			}
 		}
 	} 
@@ -65,10 +66,11 @@ int Set::read(int tag, int address)
 		lines[0].mesi = SHARED;
 		if (verbose)
 		{
-			// cout message;
+			//read from L2
+			cout << "Read from L2 " << hex << address << endl;
 		}
-		count++;
 	}
+	count++;
 	updateLRU(tag);
 	return 0;
 }
@@ -111,19 +113,21 @@ void Set::handleWriteMiss(int tag, int address)
 			if (verbose)
 			{
 				// msg: RFO
+				cout << "Read from L2 " << hex << address << " for ownership\n";
 			}
-				// read data from L2
+			// read data from L2
 			lines[i].mesi = SHARED;	// set mesi for that data
 
 			if (verbose)
 			{
 				//msg: Write to L2
+				cout << "Write to L2 " << hex << address << endl;
 			}
 			// write new data in that spot
 			lines[i].mesi = EXCLUSIVE;
 
-			updateLRU(tag);			// say that tag is newest touch
 			count++;				// increase the count
+			updateLRU(tag);			// say that tag is newest touch
 			return;
 		}
 	}
@@ -143,6 +147,7 @@ void Set::invalidate(int tag, int address)
 				{
 					// write through
 					// msg: write to L2
+					cout << "write to L2 " << hex << address << endl;
 				}
 				break;
 			case SHARED:
@@ -178,6 +183,10 @@ int Set::readFromL2(int tag, int address)
 	{
 		if (lines[i].tag == tag)
 		{
+			if (lines[i].mesi == MODIFIED /*|| lines[i].mesi == EXCLUSIVE*/)
+			{
+				cout << "Return data to L2 " << hex << address << endl;
+			}
 			lines[i].mesi = SHARED;
 			updateLRU(tag);
 			return HIT;
@@ -193,44 +202,60 @@ void Set::reset()
 	}
 }
 
-void Set::print(int address)
+void Set::print(int index)
 {
 	//Check if the current set is valid
 	if (count > 0)
 	{
+		cout << setw(7) << htos(index) << setfill(' ') << "\t | ";
 		//For loop to print data from the sets
 		for (int i = 0; i < associativity; i++)
 		{	
 			if (lines[i].mesi != INVALID)
 			{
-				cout << setw(7) << hex << address 
-					 << "\t" << setfill(' ') 
-					 << setw(3) << lines[i].LRU 
-					 << setw(7) << hex << lines[i].tag 
-					 << setw(10) << lines[i].printMESI();
+				cout << setw(7) << htos(lines[i].tag) << " : "
+					 << setw(4) << lines[i].LRU << " : "
+					 << setw(10) << lines[i].printMESI() << " | ";
+			}
+			else 
+			{
+				cout << "        :      :            | ";
 			}
 		}
+		cout << endl;
 	}
 }
 
 void Set::updateLRU(int tag)
-{
-	int lastLRU;
-	// find most recently used
+{	
+	int lastLRU = -1;
+	int lastI = -1;
+	
 	for (int i = 0; i < associativity; i++)
 	{
-		if (lines[i].tag == tag)
+		if (lines[i].tag == tag && lines[i].mesi != INVALID)
 		{
 			lastLRU = lines[i].LRU;
-			lines[i].LRU = count -1;
+			lastI = i;
+			break;
 		}
 	}
-	//update other most recently used lines
+	if (lastI < 0)
+	{
+		cerr << "ERROR: updating the LRU for an invalid tag, " << htos(tag) << '\n';
+		return;
+	}
+	if (lastLRU < 0)
+	{
+		lastLRU = 0;
+	}
+	lines[lastI].LRU = 0;
+	
 	for (int i = 0; i < associativity; i++)
 	{
-		if (lines[i].LRU > lastLRU && lines[i].tag != tag)
+		if (lines[i].mesi != INVALID && lines[i].LRU <= lastLRU && lastI != i)
 		{
-			lines[i].LRU--;
+			lines[i].LRU++;
 		}
 	}
 }
@@ -270,4 +295,26 @@ bool Set::isFull()
 		}
 	}
 	return (count > 0) ? false : true;
+}
+
+
+string Set::htos(int n)
+{
+	string ret;
+	stringstream ss;
+	ss << hex << n;
+	ret = ss.str();
+	
+	for(int i = 0; i < ret.size(); i++) 
+	{
+		if (ret.at(i) != 'd' && ret.at(i) != 'b')
+		{
+			ret.at(i) = toupper(ret.at(i));
+		}
+		else if (ret.at(i) != 'D' || ret.at(i) != 'B')
+		{
+			ret.at(i) = tolower(ret.at(i));
+		}
+	}
+	return ret;
 }
