@@ -33,8 +33,6 @@ int main(int argc, char* argv[])
 		verbose = verbose | checkFlags(argv[i], "-D");
 	}
 
-	verbose = true;
-
 	cout << "Initializing Instruction Cache\n";
 	instructionCache = new Cache(NUM_SETS, INSTR_ASSOC, verbose);
 	cout << "Initializing Data Cache\n";
@@ -52,36 +50,23 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		file.open(/*argv[1]*/"traceFile.txt");
+		file.open(argv[1]);
 		if (file.is_open())
 		{
-			//if (verbose) cout << argv[1] << " was opened successfully\n";
+			if (verbose) cout << argv[1] << " was opened successfully\n";
 			while (getline(file, line))
 			{
 				istringstream iss(line);
-				unsigned int instruction, address;
-				count++;
+				int instruction, address;
 				// process pair (a,b)
-				//if (!(iss >> instruction >> hex >> address)) { break; } // error
-				if (!(iss >> instruction))
-				{
-					cerr << "failed to read instruction code at line: " << count << endl;
-					break;
-				}
-				else if (instruction < 0 || instruction > 4 && instruction < 8 || instruction > 9)
-				{
-					cerr << "not actual code, skipping instruction code and address at line: " << count << endl;
-					break;
-				}
-				else if ((instruction != 9 || instruction != 8) && !(iss >> hex >> address))
-				{
-					cerr << "ignoring address after instruction code: " << instruction << ", THIS IS NOT AN ACTUAL ERROR\n";
-					break;
-				}
+				if (!(iss >> instruction >> hex >> address)) { break; } // error
 
 				// this is were we actually handle cache instructions
-				if (verbose) cout << instruction << ',' << hex << address << '\n';
-
+				if (verbose)
+				{
+					cout << instruction << ',' << hex << address << '\n';
+				}
+				
 				switch (instruction)
 				{
 				case 0:
@@ -100,7 +85,6 @@ int main(int argc, char* argv[])
 				case 3:
 					// invalidate
 					dataCache->invalidate(address);
-					instructionCache->invalidate(address);
 					break;
 				case 4:
 					dataCache->readFromL2(address);
@@ -118,6 +102,7 @@ int main(int argc, char* argv[])
 					cout << instruction << " found at line " << count << ", is not a valid instruction for a cache" << endl;
 					break;
 				}
+				count++;
 
 				if (verbose)
 				{

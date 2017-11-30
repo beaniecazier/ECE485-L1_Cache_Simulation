@@ -48,7 +48,6 @@ int Set::read(int tag, int address)
 		if (verbose)
 		{
 			//read from L2
-			cout << "Read from L2 " << hex << address << endl;
 		}
 		for (int i = 0; i < associativity; i++)
 		{
@@ -57,8 +56,6 @@ int Set::read(int tag, int address)
 				lines[i].tag = tag;
 				lines[i].mesi = SHARED;
 				count++;
-				updateLRU(tag);
-				return 0;
 			}
 		}
 	} 
@@ -68,12 +65,11 @@ int Set::read(int tag, int address)
 		lines[0].mesi = SHARED;
 		if (verbose)
 		{
-			//read from L2
-			cout << "Read from L2 " << hex << address << endl;
+			// cout message;
 		}
 		count++;
-		lines[0].LRU = 0;
 	}
+	updateLRU(tag);
 	return 0;
 }
 
@@ -115,15 +111,13 @@ void Set::handleWriteMiss(int tag, int address)
 			if (verbose)
 			{
 				// msg: RFO
-				cout << "Read from L2 " << hex << address << " for ownership\n";
 			}
-			// read data from L2
+				// read data from L2
 			lines[i].mesi = SHARED;	// set mesi for that data
 
 			if (verbose)
 			{
 				//msg: Write to L2
-				cout << "Write to L2 " << hex << address << endl;
 			}
 			// write new data in that spot
 			lines[i].mesi = EXCLUSIVE;
@@ -149,7 +143,6 @@ void Set::invalidate(int tag, int address)
 				{
 					// write through
 					// msg: write to L2
-					cout << "write to L2 " << hex << address;
 				}
 				break;
 			case SHARED:
@@ -185,10 +178,6 @@ int Set::readFromL2(int tag, int address)
 	{
 		if (lines[i].tag == tag)
 		{
-			if (lines[i].mesi == MODIFIED /*|| lines[i].mesi == EXCLUSIVE*/)
-			{
-				cout << "Return data to L2 " << hex << address << endl;
-			}
 			lines[i].mesi = SHARED;
 			updateLRU(tag);
 			return HIT;
@@ -221,7 +210,6 @@ void Set::print(int address)
 					 << setw(10) << lines[i].printMESI();
 			}
 		}
-		cout << endl;
 	}
 }
 
@@ -231,19 +219,18 @@ void Set::updateLRU(int tag)
 	// find most recently used
 	for (int i = 0; i < associativity; i++)
 	{
-		if (lines[i].mesi != INVALID && lines[i].tag == tag)
+		if (lines[i].tag == tag)
 		{
 			lastLRU = lines[i].LRU;
-			break;
+			lines[i].LRU = count -1;
 		}
 	}
-	lines[lastLRU].LRU = 0;
 	//update other most recently used lines
 	for (int i = 0; i < associativity; i++)
 	{
-		if (lines[i].mesi != INVALID && lines[i].LRU > lastLRU && lines[i].tag != tag)
+		if (lines[i].LRU > lastLRU && lines[i].tag != tag)
 		{
-			lines[i].LRU++;
+			lines[i].LRU--;
 		}
 	}
 }

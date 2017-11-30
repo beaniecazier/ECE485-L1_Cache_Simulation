@@ -24,7 +24,7 @@ public:
 	void printStatistics();
 
 private:
-	Set** sets;
+	Set* sets;
 	int setSize;
 	int associativity;
 	bool verbose;
@@ -34,8 +34,8 @@ private:
 	int CacheWrites;
 	long totalOperations;
 	
-	unsigned int getIndex(unsigned int address);
-	unsigned int getTag(unsigned int address); //pass this to Dustin
+	int getIndex(int address);
+	int getTag(int address); //pass this to Dustin
 };
 
 
