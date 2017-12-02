@@ -67,6 +67,7 @@ void Set::handleReadMiss(unsigned int tag)
 	{
 		if (lines[i].mesi == INVALID)
 		{
+			lines[i].tag = tag;
 			add(tag, SHARED);
 			break;
 		}
@@ -260,29 +261,46 @@ void Set::add(unsigned int tag, MESI state)
 	lines[indexToAdd].prev = 0;
 	count++;
 	lines[indexToAdd].mesi = state;
-
-	Line* temp = first;
-	int lru = 0;
-	while (temp != 0)
-	{
-		temp->LRU = lru;
-		lru++;
-		temp = temp->next;
-	}
+	setLRU();
 }
 
 void Set::remove(unsigned int tag)
 {
-	// remove from last
-	last = last->prev;
-	last->next = 0;
+	int indexToRemove;
+	for (indexToRemove = 0; indexToRemove < associativity; indexToRemove++)
+	{
+		if (lines[indexToRemove].tag == tag)
+		{
+			break;
+		}
+	}
+	if (lines[indexToRemove].LRU == 0)
+	{
+		// remove from front
+		first = first->next;
+		first->prev = 0;
+	}
+	else if (lines[indexToRemove].LRU == count - 1)
+	{
+		// remove from last
+		last = last->prev;
+		last->next = 0;
+	}
+	else
+	{
+		//remove from middle
+		lines[indexToRemove].prev->next = lines[indexToRemove].next;
+		lines[indexToRemove].next->prev = lines[indexToRemove].prev;
+	}
+
 	count--;
 	if (count < 0)
 	{
-		cerr << htos(tag) << " was being removed and brought the overall valid line count of " 
-			 << htos(reconstructAddress(tag)) << " to " << count << endl;
+		cerr << htos(tag) << " was being removed and brought the overall valid line count of "
+			<< htos(reconstructAddress(tag)) << " to " << count << endl;
 		count = 0;
 	}
+	setLRU();
 }
 
 void Set::touch(unsigned int tag)
@@ -299,6 +317,20 @@ void Set::touch(unsigned int tag)
 	temp->prev = temp->next;
 	temp->next = first;
 	first = temp;
+	temp->prev = 0;
+	setLRU();
+}
+
+void Set::setLRU()
+{
+	Line* temp = first;
+	int lru = 0;
+	while (temp != 0)
+	{
+		temp->LRU = lru;
+		lru++;
+		temp = temp->next;
+	}
 }
 
 string Set::htos(unsigned int n)

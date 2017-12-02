@@ -122,14 +122,12 @@ int main(int argc, char* argv[])
 				{
 					cout << endl;
 					printCaches();
-					cout << endl;
 					char next = getchar();
 					if (next == 'Q' || next == 'q' || next == '')
 					{
 						cout << "Now terminating simulation\n\n";
 						break;
 					}
-					cout << next << endl;
 				}
 			}
 		}
@@ -150,7 +148,7 @@ void printCaches()
 {
 	cout << "Here is are the valid contents of the L1 Instruction Cache\n";
 	instructionCache->printCache();
-	cout << "\n";
+	cout << "\n\n";
 	cout << "Here is are the valid contents of the L1 Data Cache\n";
 	dataCache->printCache();
 	cout << "\n\n";
