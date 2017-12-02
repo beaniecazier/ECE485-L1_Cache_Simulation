@@ -36,6 +36,7 @@ private:
 
 	//Private functions
 	void evict();
+	void setLRU();
 	unsigned int reconstructAddress(unsigned int tag);
 	void handleWriteMiss(unsigned int tag);
 	void handleReadMiss(unsigned int tag);
