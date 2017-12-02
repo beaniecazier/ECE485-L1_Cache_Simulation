@@ -8,6 +8,8 @@ Line::Line()
 	mesi = INVALID;
 	LRU = -1;
 	tag = -1;
+	next = 0;
+	prev = 0;
 }
 
 Line::~Line()
@@ -19,6 +21,8 @@ void Line::invalidate()
 	mesi = INVALID;
 	LRU = -1;
 	tag = -1;
+	next = 0;
+	prev = 0;
 }
 
 string Line::printMESI()

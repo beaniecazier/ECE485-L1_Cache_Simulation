@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 	string line;
 	ifstream file;
 	bool debug = false;
-	bool verbose = false;hello.dll
+	bool verbose = false;
 	int count = 0;
 	
 	for (int i = 0; i < argc; i++)
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 	cout << "Initializing Data Cache\n\n";
 	dataCache = new Cache(NUM_SETS, DATA_ASSOC, debug);
 	
-	if (verbose) cout << "Opening file\n";hello.dll
+	if (verbose) cout << "Opening file\n";
 
 	try
 	{
@@ -99,10 +99,10 @@ int main(int argc, char* argv[])
 				case 3:
 					// invalidate
 					dataCache->invalidate(address);
-					instructionCache->invalidate(address);
 					break;
 				case 4:
 					dataCache->readFromL2(address);
+					instructionCache->readFromL2(address);
 					break;
 				case 8:
 					// clear reset

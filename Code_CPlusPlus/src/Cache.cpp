@@ -17,7 +17,7 @@ Cache::Cache(int size, int a, bool v)
 	totalOperations = 0;
 	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
 	{
-		sets[i] = new Set(associativity, verbose);
+		sets[i] = new Set(associativity, i, verbose, PROC_SIZE, TAG_BITS, OFFSET_BITS);
 	}
 }
 
@@ -54,7 +54,7 @@ void Cache::readData(int address)
 	unsigned int tag = getTag(address);
 	unsigned int index = getIndex(address);
 	if (verbose) cout << "INDEX: " << hex << index << ", TAG: " << hex << tag << endl;
-	int hit = sets[index]->read(tag, address);
+	int hit = sets[index]->read(tag);
 	HitCount += (hit) ? 1: 0;
 	MissCount += (!hit) ? 1 : 0;
 	if (verbose) cout << endl;
@@ -67,7 +67,7 @@ void Cache::writeData(int address)
 	totalOperations++;
 	CacheWrites++;
 	if (verbose) cout << "INDEX: " << hex << index << ", TAG: " << hex << tag << endl;
-	int hit = sets[index]->write(tag, address);
+	int hit = sets[index]->write(tag);
 	HitCount += (hit) ? 1 : 0;
 	MissCount += (!hit) ? 1 : 0;
 	if (verbose) cout << endl;
@@ -80,12 +80,7 @@ void Cache::invalidate(int address)
 
 void Cache::readFromL2(int address)
 {
-	int hit = sets[ getIndex( address) ]->readFromL2( getTag( address), address);
-	totalOperations++;
-	CacheWrites++;
-	HitCount += (hit) ? 1 : 0;
-	MissCount += (!hit) ? 1 : 0;
-	if (verbose) cout << endl;
+	sets[ getIndex( address) ]->readFromL2( getTag( address));
 }
 
 void Cache::resetAll()
@@ -118,7 +113,7 @@ void Cache::printCache()
 	cout << endl;
 	for( int i = 0; i < setSize; i++)
 	{
-		sets[ i]->print(i);
+		sets[ i]->print();
 	}
 	cout << endl;
 }

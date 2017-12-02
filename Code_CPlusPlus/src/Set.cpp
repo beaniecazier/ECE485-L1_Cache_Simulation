@@ -6,15 +6,17 @@
 
 using namespace std;
 
-Set::Set(int a, bool v)
+Set::Set(int a, int i, bool v, int aSize, int tSize, int oSize)
 {
  	verbose = v;
 	associativity = a;
+	index = i;
  	lines = new Line[associativity];
-	//for (int i = 0; i < associativity; i++)
-	//{
-		//lines[i] = *(new Line());
-	//}
+	first = 0;
+	last = 0;
+	addressBitLength = aSize;
+	tagBitLength = tSize;
+	offsetBitLength = oSize;
 }
 
 Set::~Set()
@@ -26,7 +28,7 @@ Set::~Set()
  	delete [] lines;
 }
 
-int Set::read(int tag, int address)
+int Set::read(unsigned int tag)
 {
 	//Check for a valid in the set of data
 	if (count > 0)
@@ -37,49 +39,45 @@ int Set::read(int tag, int address)
 			//Check to see if any of the tags match
 			if (lines[i].mesi != INVALID && tag == lines[i].tag)
 			{
-				updateLRU(tag);
-				// update hit count
-				return 1;
+				touch(tag);
+				return HIT;
 			}
 		}
 		if (isFull())
 		{
-			readEvict(address);
+			evict();
 		}
-		if (verbose)
-		{
-			//read from L2
-			cout << "Read from L2 " << hex << address << endl;
-		}
-		for (int i = 0; i < associativity; i++)
-		{
-			if (lines[i].mesi = INVALID)
-			{
-				lines[i].tag = tag;
-				lines[i].mesi = SHARED;
-			}
-		}
+		handleReadMiss(tag);
 	} 
 	else 
 	{
-		lines[0].tag = tag;
-		lines[0].mesi = SHARED;
-		if (verbose)
-		{
-			//read from L2
-			cout << "Read from L2 " << hex << address << endl;
-		}
+		handleReadMiss(tag);
 	}
-	count++;
-	updateLRU(tag);
-	return 0;
+	return MISS;
 }
 
-int Set::write(int tag, int address)
+void Set::handleReadMiss(unsigned int tag)
+{
+	if (verbose)
+	{
+		//read from L2
+		cout << "Read from L2 " << htos(reconstructAddress(tag)) << endl;
+	}
+	for (int i = 0; i < associativity; i++)
+	{
+		if (lines[i].mesi == INVALID)
+		{
+			add(tag, SHARED);
+			break;
+		}
+	}
+}
+
+int Set::write(unsigned int tag)
 {
 	if (count == 0)		// if invalid set
 	{
-		handleWriteMiss(tag, address);
+		handleWriteMiss(tag);
 		return MISS;
 	}
 	else
@@ -88,20 +86,22 @@ int Set::write(int tag, int address)
 		{
 			if (lines[i].tag == tag)		// find a hit
 			{
-				lines[i].mesi = MODIFIED;
-				updateLRU(tag);
+				if (lines[i].mesi == EXCLUSIVE) lines[i].mesi = MODIFIED;
+				else if (lines[i].mesi != MODIFIED) lines[i].mesi = EXCLUSIVE;
+				touch(tag);					// this handles LRU for this hit
 				return HIT;
 			}
 		}
 		if (isFull())
 		{
-			writeEvict();
+			evict();
 		}
-		handleWriteMiss(tag, address);
+		handleWriteMiss(tag);
+		return MISS;
 	}
 }
 
-void Set::handleWriteMiss(int tag, int address)
+void Set::handleWriteMiss(unsigned int tag)
 {
 	for (int i = 0; i < associativity; i++)
 	{
@@ -113,7 +113,7 @@ void Set::handleWriteMiss(int tag, int address)
 			if (verbose)
 			{
 				// msg: RFO
-				cout << "Read from L2 " << hex << address << " for ownership\n";
+				cout << "Read from L2 " << htos(reconstructAddress(tag)) << " for ownership\n";
 			}
 			// read data from L2
 			lines[i].mesi = SHARED;	// set mesi for that data
@@ -121,60 +121,16 @@ void Set::handleWriteMiss(int tag, int address)
 			if (verbose)
 			{
 				//msg: Write to L2
-				cout << "Write to L2 " << hex << address << endl;
+				cout << "Write to L2 " << htos(reconstructAddress(tag)) << endl;
 			}
 			// write new data in that spot
-			lines[i].mesi = EXCLUSIVE;
-
-			count++;				// increase the count
-			updateLRU(tag);			// say that tag is newest touch
+			add(tag, EXCLUSIVE);
 			return;
 		}
 	}
 }
 
-void Set::invalidate(int tag, int address)
-{
-	for(int i = 0; i < associativity; i++)
-	{
-		if (lines[i].tag == tag)
-		{
-			switch (lines[i].mesi)
-			{
-			case MODIFIED:
-			case EXCLUSIVE:
-				if (verbose)
-				{
-					// write through
-					// msg: write to L2
-					cout << "write to L2 " << hex << address << endl;
-				}
-				break;
-			case SHARED:
-				break;
-			default:
-				// cout error cant invalidate invalid line dumbass
-				break;
-			}
-			lines[i].invalidate();
-			count--;
-		}
-	}
-	if (count <= 0)
-	{
-		count = 0;
-	}
-}
-
-void Set::invalidate(int address)
-{
-	for(int i = 0; i < associativity; i++)
-	{
-		invalidate(lines[i].tag, address);
-	}
-}
-
-int Set::readFromL2(int tag, int address)
+void Set::readFromL2(unsigned int tag)
 {
 	// called on 4
 	// have to set mesi to shared
@@ -183,13 +139,51 @@ int Set::readFromL2(int tag, int address)
 	{
 		if (lines[i].tag == tag)
 		{
-			if (lines[i].mesi == MODIFIED /*|| lines[i].mesi == EXCLUSIVE*/)
+			if (lines[i].mesi == MODIFIED || lines[i].mesi == EXCLUSIVE)
 			{
-				cout << "Return data to L2 " << hex << address << endl;
+				cout << "Return data to L2 " << htos(reconstructAddress(tag)) << endl;
 			}
 			lines[i].mesi = SHARED;
-			updateLRU(tag);
-			return HIT;
+			touch(tag);
+		}
+	}
+}
+
+void Set::evict()
+{
+	int indexToEvict;
+	for (indexToEvict = 0; indexToEvict < associativity; indexToEvict++)
+	{
+		if (lines[indexToEvict].LRU == count - 1) break;
+	}
+	invalidate(lines[indexToEvict].tag);
+}
+
+void Set::invalidate(unsigned int tag)
+{
+	for(int i = 0; i < associativity; i++)
+	{
+		if (lines[i].tag == tag)
+		{
+			switch (lines[i].mesi)
+			{
+			case MODIFIED:
+			//case EXCLUSIVE:
+				if (verbose)
+				{
+					// write through
+					// msg: write to L2
+					cout << "write to L2 " << htos(reconstructAddress(tag)) << endl;
+				}
+				break;
+			case SHARED:
+				break;
+			default:
+				//cerr << "error cant invalidate invalid line dumbass\n";
+				break;
+			}
+			remove(tag);
+			lines[i].invalidate();
 		}
 	}
 }
@@ -198,11 +192,11 @@ void Set::reset()
 {
 	for (int i = 0; i < associativity; i++)
 	{
-		lines[i].invalidate();
+		invalidate(lines[i].tag);
 	}
 }
 
-void Set::print(int index)
+void Set::print()
 {
 	//Check if the current set is valid
 	if (count > 0)
@@ -226,64 +220,6 @@ void Set::print(int index)
 	}
 }
 
-void Set::updateLRU(int tag)
-{	
-	int lastLRU = -1;
-	int lastI = -1;
-	
-	for (int i = 0; i < associativity; i++)
-	{
-		if (lines[i].tag == tag && lines[i].mesi != INVALID)
-		{
-			lastLRU = lines[i].LRU;
-			lastI = i;
-			break;
-		}
-	}
-	if (lastI < 0)
-	{
-		cerr << "ERROR: updating the LRU for an invalid tag, " << htos(tag) << '\n';
-		return;
-	}
-	if (lastLRU < 0)
-	{
-		lastLRU = 0;
-	}
-	lines[lastI].LRU = 0;
-	
-	for (int i = 0; i < associativity; i++)
-	{
-		if (lines[i].mesi != INVALID && lines[i].LRU <= lastLRU && lastI != i)
-		{
-			lines[i].LRU++;
-		}
-	}
-}
-
-int Set::checkLRU()
-{
-	for (int i = 0; i < associativity; i++)
-	{
-		if (lines[i].LRU == 0) return i;
-	}
-}
-
-void Set::readEvict(int address)
-{
-	if (verbose)
-	{
-		// write message
-	}
-	lines[checkLRU()].invalidate();
-	count--;
-}
-
-void Set::writeEvict()
-{
-	lines[checkLRU()].invalidate();
-	count--;
-}
-
 bool Set::isFull()
 {
 	int count = 0;
@@ -297,8 +233,75 @@ bool Set::isFull()
 	return (count > 0) ? false : true;
 }
 
+void Set::add(unsigned int tag, MESI state)
+{
+	// add to front
+	int indexToAdd;
+	for (indexToAdd = 0; indexToAdd < associativity; indexToAdd++)
+	{
+		if (lines[indexToAdd].tag == tag)
+		{
+			break;
+		}
+	}
+	if (first == 0)
+	{
+		first = &lines[indexToAdd];
+		first->next = first->prev = 0;
+		last = first;
+		lines[indexToAdd].LRU = 0;
+		lines[indexToAdd].mesi = state;
+		count++;
+		return;
+	}
+	lines[indexToAdd].next = first;
+	first->prev = &lines[indexToAdd];
+	first = &lines[indexToAdd];
+	lines[indexToAdd].prev = 0;
+	count++;
+	lines[indexToAdd].mesi = state;
 
-string Set::htos(int n)
+	Line* temp = first;
+	int lru = 0;
+	while (temp != 0)
+	{
+		temp->LRU = lru;
+		lru++;
+		temp = temp->next;
+	}
+}
+
+void Set::remove(unsigned int tag)
+{
+	// remove from last
+	last = last->prev;
+	last->next = 0;
+	count--;
+	if (count < 0)
+	{
+		cerr << htos(tag) << " was being removed and brought the overall valid line count of " 
+			 << htos(reconstructAddress(tag)) << " to " << count << endl;
+		count = 0;
+	}
+}
+
+void Set::touch(unsigned int tag)
+{
+	Line* temp = first;
+	while (temp)
+	{
+		if (temp->tag == tag) break;
+	}
+	if (temp == 0)
+	{
+		return;
+	}
+	temp->prev = temp->next;
+	temp->next = first;
+	first = temp;
+}
+
+string Set::htos(unsigned int n)
 {
 	string ret;
 	stringstream ss;
@@ -317,4 +320,9 @@ string Set::htos(int n)
 		}
 	}
 	return ret;
+}
+
+unsigned int Set::reconstructAddress(unsigned int tag)
+{
+	return tag << offsetBitLength + tagBitLength + index << offsetBitLength;
 }
