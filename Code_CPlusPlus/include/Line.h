@@ -24,6 +24,8 @@ public:
 	int tag;
 	int LRU;
 	MESI mesi;
+	Line* prev;
+	Line* next;
 private:
 };
 
