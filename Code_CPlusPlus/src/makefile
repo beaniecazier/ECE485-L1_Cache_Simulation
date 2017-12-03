@@ -11,7 +11,6 @@ endif
 
 CacheSim: CacheSim.cpp Cache.cpp Set.cpp Line.cpp
 	make clean
-	echo $(TARGET)
 	$(CC) -o CacheSim.o CacheSim.cpp Cache.cpp Set.cpp Line.cpp $(CFLAGS)
 
 .PHONY: clean
