@@ -34,6 +34,7 @@ private:
 	unsigned int tagBitLength;
 	unsigned int offsetBitLength;
 
+
 	//Private functions
 	void evict();
 	void setLRU();
