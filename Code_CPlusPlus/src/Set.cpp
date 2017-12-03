@@ -309,15 +309,29 @@ void Set::touch(unsigned int tag)
 	while (temp)
 	{
 		if (temp->tag == tag) break;
+		temp = temp->next;
 	}
 	if (temp == 0)
 	{
 		return;
 	}
-	temp->prev = temp->next;
-	temp->next = first;
-	first = temp;
-	temp->prev = 0;
+	if (temp != first && temp != last)
+	{
+		temp->prev->next = temp->next;
+		temp->next->prev = temp->prev;
+		temp->next = first;
+		first->prev = temp;
+		first = temp;
+		temp->prev = 0;
+	}
+	else if (temp == last)
+	{
+		temp->prev->next = 0;
+		temp->prev = 0;
+		temp->next = first;
+		first->prev = temp;
+		first = temp;
+	}
 	setLRU();
 }
 
