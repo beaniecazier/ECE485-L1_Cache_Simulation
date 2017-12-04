@@ -31,7 +31,7 @@ private:
 	int count;
 	unsigned int index;
 	unsigned int addressBitLength;
-	unsigned int tagBitLength;
+	unsigned int indexBitLength;
 	unsigned int offsetBitLength;
 
 
