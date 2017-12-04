@@ -152,7 +152,10 @@ void Set::readFromL2(unsigned int tag)
 		{
 			if (lines[i].mesi == MODIFIED || lines[i].mesi == EXCLUSIVE)
 			{
-				cout << "Return data to L2 " << htos(reconstructAddress(tag)) << endl;
+				if(verbose)
+				{
+					cout << "Return data to L2 " << htos(reconstructAddress(tag)) << endl;
+				}
 			}
 			lines[i].mesi = SHARED;
 			touch(tag);
