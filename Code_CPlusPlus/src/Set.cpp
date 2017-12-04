@@ -94,7 +94,10 @@ int Set::write(unsigned int tag)
 				else if (lines[i].mesi != MODIFIED)
 				{
 					lines[i].mesi = EXCLUSIVE;
-					cout << "Read from L2 " << htos(reconstructAddress(tag)) << endl;
+					if (verbose)
+					{
+						cout << "Write to L2 " << htos(reconstructAddress(tag)) << endl;
+					}
 				}
 				touch(tag);					// this handles LRU for this hit
 				return HIT;
