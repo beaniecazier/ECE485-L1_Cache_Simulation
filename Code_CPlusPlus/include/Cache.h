@@ -41,4 +41,4 @@ private:
 
 //test
 
-#endif CACHE_H_20171123
+#endif

@@ -47,4 +47,4 @@ private:
 	void remove(unsigned int tag);
 	void touch(unsigned int tag);
 };
-#endif SET_H_20171123
+#endif
