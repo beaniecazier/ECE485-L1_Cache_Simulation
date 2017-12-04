@@ -15,9 +15,10 @@ Cache::Cache(int size, int a, bool v)
 	CacheReads = 0;
 	CacheWrites = 0;
 	totalOperations = 0;
+	unsigned int indexBitLength = PROC_SIZE - TAG_BITS - OFFSET_BITS;
 	for (int i = 0; i < setSize; i++) //classes are defined with uppercase; sets is a variable
 	{
-		sets[i] = new Set(associativity, i, verbose, PROC_SIZE, TAG_BITS, OFFSET_BITS);
+		sets[i] = new Set(associativity, i, verbose, PROC_SIZE, indexBitLength, OFFSET_BITS);
 	}
 }
 

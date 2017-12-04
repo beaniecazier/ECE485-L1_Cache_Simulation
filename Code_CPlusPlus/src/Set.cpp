@@ -6,7 +6,7 @@
 
 using namespace std;
 
-Set::Set(int a, int i, bool v, int aSize, int tSize, int oSize)
+Set::Set(int a, int i, bool v, int aSize, int iSize, int oSize)
 {
  	verbose = v;
 	associativity = a;
@@ -15,7 +15,7 @@ Set::Set(int a, int i, bool v, int aSize, int tSize, int oSize)
 	first = 0;
 	last = 0;
 	addressBitLength = aSize;
-	tagBitLength = tSize;
+	indexBitLength = iSize;
 	offsetBitLength = oSize;
 }
 
@@ -87,8 +87,15 @@ int Set::write(unsigned int tag)
 		{
 			if (lines[i].tag == tag)		// find a hit
 			{
-				if (lines[i].mesi == EXCLUSIVE) lines[i].mesi = MODIFIED;
-				else if (lines[i].mesi != MODIFIED) lines[i].mesi = EXCLUSIVE;
+				if (lines[i].mesi == EXCLUSIVE)
+				{
+					lines[i].mesi = MODIFIED;
+				}
+				else if (lines[i].mesi != MODIFIED)
+				{
+					lines[i].mesi = EXCLUSIVE;
+					cout << "Read from L2 " << htos(reconstructAddress(tag)) << endl;
+				}
 				touch(tag);					// this handles LRU for this hit
 				return HIT;
 			}
@@ -329,6 +336,10 @@ void Set::touch(unsigned int tag)
 		first = temp;
 		temp->prev = 0;
 	}
+	else if (temp == first && temp == last)
+	{
+		return;
+	}
 	else if (temp == last)
 	{
 		temp->prev->next = 0;
@@ -379,5 +390,8 @@ string Set::htos(unsigned int n)
 
 unsigned int Set::reconstructAddress(unsigned int tag)
 {
-	return tag << offsetBitLength + tagBitLength + index << offsetBitLength;
+	unsigned int tagShift = (offsetBitLength + indexBitLength);
+	unsigned int pTag = tag << tagShift;
+	unsigned int pIndex = index << offsetBitLength;
+	return pTag + pIndex;
 }
