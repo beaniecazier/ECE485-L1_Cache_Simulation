@@ -277,8 +277,13 @@ void Set::remove(unsigned int tag)
 	if (lines[indexToRemove].LRU == 0)
 	{
 		// remove from front
-		first = first->next;
 		first->prev = 0;
+		first = first->next;
+		if (first == 0)
+		{
+			last = 0;
+			return;
+		}
 	}
 	else if (lines[indexToRemove].LRU == count - 1)
 	{
@@ -306,7 +311,7 @@ void Set::remove(unsigned int tag)
 void Set::touch(unsigned int tag)
 {
 	Line* temp = first;
-	while (temp)
+	while (temp != 0)
 	{
 		if (temp->tag == tag) break;
 		temp = temp->next;
