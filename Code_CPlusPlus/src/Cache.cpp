@@ -123,7 +123,7 @@ void Cache::printStatistics()
 	double hitRate = ((double)HitCount) / ((double)totalOperations) * 100.0;
 	double missRate = ((double)MissCount) / ((double)totalOperations) * 100.0;
 	
-	cout << "out of " << totalOperations << " total operations\n"
+	cout << "out of " << dec << totalOperations << " total operations\n"
 		 << "There were " << CacheReads << " cache reads and " << CacheWrites << " cache writes\n"
 		 << "The hit and miss rate was " << setprecision(3) << hitRate << "% and " << missRate << "%\n";
 }
