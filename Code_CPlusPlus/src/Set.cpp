@@ -87,7 +87,10 @@ int Set::write(unsigned int tag)
 		{
 			if (lines[i].tag == tag)		// find a hit
 			{
-				if (lines[i].mesi == EXCLUSIVE) lines[i].mesi = MODIFIED;
+				if (lines[i].mesi == EXCLUSIVE) 
+				{
+					lines[i].mesi = MODIFIED;
+				}
 				else if (lines[i].mesi != MODIFIED)
 				{
 					lines[i].mesi = EXCLUSIVE;
