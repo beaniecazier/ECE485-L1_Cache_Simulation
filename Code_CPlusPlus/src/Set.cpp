@@ -88,7 +88,11 @@ int Set::write(unsigned int tag)
 			if (lines[i].tag == tag)		// find a hit
 			{
 				if (lines[i].mesi == EXCLUSIVE) lines[i].mesi = MODIFIED;
-				else if (lines[i].mesi != MODIFIED) lines[i].mesi = EXCLUSIVE;
+				else if (lines[i].mesi != MODIFIED)
+				{
+					lines[i].mesi = EXCLUSIVE;
+					cout << "Write to L2 " << htos(reconstructAddress(tag)) << endl;
+				}
 				touch(tag);					// this handles LRU for this hit
 				return HIT;
 			}
